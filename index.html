@@ -1,60 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Model Selection Data Generator</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: 40px auto;
-      padding: 20px;
-      line-height: 1.6;
-    }
-    button {
-      padding: 12px 20px;
-      font-size: 16px;
-      border: none;
-      background: #1a73e8;
-      color: white;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #155fc4;
-    }
-    .box {
-      background: #f2f2f2;
-      padding: 15px;
-      border-radius: 8px;
-      margin-top: 20px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Secret Mission Data Generator</title>
+<style>
+  body {
+    font-family: "Courier New", monospace;
+    background-color: #0d0d0d;
+    color: #00ff99;
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+    line-height: 1.7;
+    text-shadow: 0 0 5px #00ff99;
+  }
+  h1 {
+    text-align: center;
+    letter-spacing: 3px;
+    font-size: 32px;
+  }
+  .terminal-box {
+    background: rgba(0, 20, 0, 0.8);
+    border: 1px solid #00ff99;
+    padding: 18px;
+    border-radius: 8px;
+    margin-top: 25px;
+  }
+  button {
+    padding: 14px 22px;
+    font-size: 17px;
+    border: 2px solid #00ff99;
+    background: black;
+    color: #00ff99;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+    display: block;
+    margin: 20px auto;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  button:hover {
+    background: #00ff99;
+    color: black;
+    box-shadow: 0 0 10px #00ff99;
+  }
+  ul li::before {
+    content: "▶ ";
+    color: #00ff99;
+  }
+  .scanline {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(0, 255, 153, 0.05) 0px,
+      rgba(0, 255, 153, 0.05) 3px,
+      rgba(0, 255, 153, 0.02) 3px,
+      rgba(0, 255, 153, 0.02) 6px
+    );
+  }
+</style>
 </head>
 <body>
-  <h1>Model Selection Simulation Data Generator</h1>
-  <p>Click the button below to generate simulated data (n = 50) with predictor variables X1–X4 and predicted values from Model 1–4.</p>
+<div class="scanline"></div>
+<h1>SECRET MISSION: DATA SIMULATION MODULE</h1>
+<p style="text-align:center;">ACCESS LEVEL: <span style="color:#ff4444;">AUTHORIZED</span></p>
 
-  <button onclick="generateCSV()">Generate & Download CSV</button>
+<p>Your objective: deploy the generator to produce a classified dataset used for statistical model selection training.</p>
+<p>Click the button below to deploy the simulation protocol.</p>
 
-  <div class="box">
-    <h3>Included Columns</h3>
-    <ul>
-      <li>X1_income_juta</li>
-      <li>X2_area_m2</li>
-      <li>X3_occupants</li>
-      <li>X4_apartment_1_yes</li>
-      <li>Y_energy_kWh</li>
-      <li>Yhat_1</li>
-      <li>Yhat_2</li>
-      <li>Yhat_3</li>
-      <li>Yhat_4</li>
-    </ul>
-  </div>
+<button onclick="generateCSV()">EXECUTE DATA GENERATION</button>
+
+<div class="terminal-box">
+  <h3>Generated Dataset Will Contain:</h3>
+  <ul>
+    <li>X1_income_juta</li>
+    <li>X2_area_m2</li>
+    <li>X3_occupants</li>
+    <li>X4_apartment_1_yes</li>
+    <li>Y_energy_kWh</li>
+    <li>Yhat_1</li>
+    <li>Yhat_2</li>
+    <li>Yhat_3</li>
+    <li>Yhat_4</li>
+  </ul>
+</div>
 
 <script>
-// Utility Gaussian generator
 function randn() {
   let u = 0, v = 0;
   while (u === 0) u = Math.random();
@@ -62,10 +100,14 @@ function randn() {
   return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
 }
 
+function poisson(lambda) {
+  let L = Math.exp(-lambda), k = 0, p = 1;
+  do { k++; p *= Math.random(); } while (p > L);
+  return k - 1;
+}
+
 function generateCSV() {
   const n = 50;
-
-  // True parameters
   const beta0 = 50, beta1 = 8, beta2 = 0.6, beta3 = 12, beta4 = -30;
   const sigma = 80;
 
@@ -81,7 +123,6 @@ function generateCSV() {
     const noise = sigma * randn();
     const Y = +(beta0 + beta1*X1 + beta2*X2 + beta3*X3 + beta4*X4 + noise).toFixed(2);
 
-    // Predictions from Model 1–4
     const Y1 = beta0 + beta1*X1;
     const Y2 = beta0 + beta1*X1 + beta2*X2;
     const Y3 = beta0 + beta1*X1 + beta2*X2 + beta3*X3;
@@ -91,16 +132,7 @@ function generateCSV() {
   }
 
   let csvContent = rows.map(e => e.join(",")).join("\n");
-  downloadCSV(csvContent, "model_selection_data.csv");
-}
-
-function poisson(lambda) {
-  let L = Math.exp(-lambda), k = 0, p = 1;
-  do {
-    k++;
-    p *= Math.random();
-  } while (p > L);
-  return k - 1;
+  downloadCSV(csvContent, "mission_data_payload.csv");
 }
 
 function downloadCSV(content, filename) {
