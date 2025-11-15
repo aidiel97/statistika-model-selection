@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Model Selection Data Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      border: none;
+      background: #1a73e8;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #155fc4;
+    }
+    .box {
+      background: #f2f2f2;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Model Selection Simulation Data Generator</h1>
+  <p>Click the button below to generate simulated data (n = 50) with predictor variables X1–X4 and predicted values from Model 1–4.</p>
+
+  <button onclick="generateCSV()">Generate & Download CSV</button>
+
+  <div class="box">
+    <h3>Included Columns</h3>
+    <ul>
+      <li>X1_income_juta</li>
+      <li>X2_area_m2</li>
+      <li>X3_occupants</li>
+      <li>X4_apartment_1_yes</li>
+      <li>Y_energy_kWh</li>
+      <li>Yhat_1</li>
+      <li>Yhat_2</li>
+      <li>Yhat_3</li>
+      <li>Yhat_4</li>
+    </ul>
+  </div>
+
+<script>
+// Utility Gaussian generator
+function randn() {
+  let u = 0, v = 0;
+  while (u === 0) u = Math.random();
+  while (v === 0) v = Math.random();
+  return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+}
+
+function generateCSV() {
+  const n = 50;
+
+  // True parameters
+  const beta0 = 50, beta1 = 8, beta2 = 0.6, beta3 = 12, beta4 = -30;
+  const sigma = 80;
+
+  let rows = [];
+  rows.push(["X1_income_juta","X2_area_m2","X3_occupants","X4_apartment_1_yes","Y_energy_kWh","Yhat_1","Yhat_2","Yhat_3","Yhat_4"]);
+
+  for (let i = 0; i < n; i++) {
+    const X1 = +(10 + 3 * randn()).toFixed(2);
+    const X2 = +(40 + Math.random() * 160).toFixed(1);
+    const X3 = poisson(3);
+    const X4 = Math.random() < 0.35 ? 1 : 0;
+
+    const noise = sigma * randn();
+    const Y = +(beta0 + beta1*X1 + beta2*X2 + beta3*X3 + beta4*X4 + noise).toFixed(2);
+
+    // Predictions from Model 1–4
+    const Y1 = beta0 + beta1*X1;
+    const Y2 = beta0 + beta1*X1 + beta2*X2;
+    const Y3 = beta0 + beta1*X1 + beta2*X2 + beta3*X3;
+    const Y4 = beta0 + beta1*X1 + beta2*X2 + beta3*X3 + beta4*X4;
+
+    rows.push([X1, X2, X3, X4, Y, Y1.toFixed(2), Y2.toFixed(2), Y3.toFixed(2), Y4.toFixed(2)]);
+  }
+
+  let csvContent = rows.map(e => e.join(",")).join("\n");
+  downloadCSV(csvContent, "model_selection_data.csv");
+}
+
+function poisson(lambda) {
+  let L = Math.exp(-lambda), k = 0, p = 1;
+  do {
+    k++;
+    p *= Math.random();
+  } while (p > L);
+  return k - 1;
+}
+
+function downloadCSV(content, filename) {
+  const blob = new Blob([content], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+
+</body>
+</html>
